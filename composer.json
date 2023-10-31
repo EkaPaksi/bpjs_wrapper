@@ -1,5 +1,5 @@
 {
-    "name": "ekapaksi/bpjs2",
+    "name": "ekapaksi/bpjswrapper",
     "description": "Wrapper for BPJS Indonesia",
     "type": "package",
     "authors": [
