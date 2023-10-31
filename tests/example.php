@@ -3,10 +3,8 @@
 require_once __DIR__.'/../vendor/autoload.php';
 require_once 'config.php';
 
-//use referensi serivce
-$referensi = new Nsulistiyawan\Bpjs\VClaim\Referensi($vclaim_conf);
-var_dump($referensi->diagnosa('A00'));
+$Jadwaldokter = new \Nsulistiyawan\Bpjs\Antrean\Jadwaldokter($antrol_conf);
+var_dump($Jadwaldokter->getJadwal('BED','2023-10-31'));
 
-//use peserta service
-$peserta = new \Nsulistiyawan\Bpjs\VClaim\Peserta($vclaim_conf);
-var_dump($peserta->getByNoKartu('123456789','2018-09-16'));
+$Referensi_antrean = new \Nsulistiyawan\Bpjs\Antrean\Referensi_antrean($antrol_conf);
+var_dump($Referensi_antrean->referensiPoli());

@@ -1,10 +1,12 @@
 <?php
+
 namespace Nsulistiyawan\Bpjs;
 
 use GuzzleHttp\Client;
 use LZCompressor\LZString;
 
-class BpjsService{
+class BpjsService
+{
 
     /**
      * Guzzle HTTP Client object
@@ -63,7 +65,7 @@ class BpjsService{
             'verify' => false
         ]);
 
-        foreach ($configurations as $key => $val){
+        foreach ($configurations as $key => $val) {
             if (property_exists($this, $key)) {
                 $this->$key = $val;
             }
@@ -102,11 +104,11 @@ class BpjsService{
 
     private function _getDecryptionKey()
     {
-        return $this->cons_id.$this->secret_key.$this->timestamp;
+        return $this->cons_id . $this->secret_key . $this->timestamp;
     }
 
     // returns response object or false
-    private function _request($method, $feature, $data=[], $headers=[])
+    private function _request($method, $feature, $data = [], $headers = [])
     {
         if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE']))
             return false;
@@ -122,44 +124,56 @@ class BpjsService{
 
         try {
             $response = json_decode(
-                            $this->clients->request(
-                                $method,
-                                $this->base_url . '/' . $this->service_name . '/' . $feature,
-                                $opts
-                            )->getBody()->getContents()
-                        , true);
+                $this->clients->request(
+                    $method,
+                    $this->base_url . '/' . $this->service_name . '/' . $feature,
+                    $opts
+                )->getBody()->getContents(),
+                true
+            );
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             if ($e->getCode() == 0) {
                 $handlerContext = $e->getHandlerContext();
                 $response = [
-                                'metaData' => [
-                                    'code' => $handlerContext['errno'],
-                                    'message' => $handlerContext['error']
-                                ]
-                            ];
-            }
-            else
+                    'metaData' => [
+                        'code' => $handlerContext['errno'],
+                        'message' => $handlerContext['error']
+                    ]
+                ];
+            } else
                 $response = [
-                                'metaData' => [
-                                    'code' => $e->getCode(),
-                                    'message' => $e->getMessage()
-                                ]
-                            ];
+                    'metaData' => [
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage()
+                    ]
+                ];
         }
 
-        // if ($response['metaData']['code'] ?? '' == '200' and !empty($response['response']) and is_string($response['response']))
-        //     $response['response'] = json_decode($this->_decompress($response['response']), true);
-        // return $response;
-
-        if (($response['metadata']['code'] == '1' || $response['metaData']['code'] == '200') and is_string($response['response']))
-            $response['response'] = json_decode($this->_decompress($response['response']), true);
+        if (
+            (isset($response['metaData']['code']) && $response['metaData']['code'] == '200') ||
+            (isset($response['metadata']['code']) && $response['metadata']['code'] == '200') ||
+            (isset($response['metadata']['code']) && $response['metadata']['code'] == '1')
+        ) {
+            if (isset($response['response']) && is_string($response['response'])) {
+                $decodedResponse = json_decode($this->_decompress($response['response']), true);
+                if ($decodedResponse !== null) {
+                    $response['response'] = $decodedResponse;
+                }
+            } else {
+                // Handle the case where 'response' doesn't exist or is not a string.
+            }
+        } else {
+            // Handle the case where 'code' is not one of the expected values or is missing.
+        }
         
-        // if ($response['metaData']['code'] ?? '' == '200' and !empty($response['response']) and is_string($response['response']))
-        //     $response['response'] = json_decode($this->_decompress($response['response']), true);
+        
+
+
         return $response;
     }
 
-    private function _decompress($txt) {
+    private function _decompress($txt)
+    {
         $key  = $this->_getDecryptionKey();
         $hash = hex2bin(hash('sha256', $key));
         $iv   = substr($hash, 0, 16);
@@ -171,20 +185,23 @@ class BpjsService{
         return LZString::decompressFromEncodedURIComponent($tmp);
     }
 
-    protected function get($feature) {
+    protected function get($feature)
+    {
         return $this->_request('GET', $feature);
     }
 
-    protected function post($feature, $data=[], $headers=[]) {
+    protected function post($feature, $data = [], $headers = [])
+    {
         return $this->_request('POST', $feature, $data, $headers);
     }
 
-    protected function put($feature, $data=[]) {
+    protected function put($feature, $data = [])
+    {
         return $this->_request('PUT', $feature, $data);
     }
 
-    protected function delete($feature, $data=[]) {
+    protected function delete($feature, $data = [])
+    {
         return $this->_request('DELETE', $feature, $data);
     }
-
 }

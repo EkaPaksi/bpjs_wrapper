@@ -21,7 +21,7 @@ class Referensi_antrean extends BpjsService
         ];
         $response = $this->get('ref/dokter');
         
-        return json_decode($response,true);
+        return $response;
     }
     public function referensiPoliFinger()
     {
@@ -30,7 +30,7 @@ class Referensi_antrean extends BpjsService
         ];
         $response = $this->get('ref/poli/fp');
         
-        return json_decode($response,true);
+        return $response;
     }
    
 }
