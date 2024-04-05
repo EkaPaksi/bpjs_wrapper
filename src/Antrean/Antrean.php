@@ -6,9 +6,6 @@ class Antrean extends BpjsService
 {
     public function getListTask($data = [])
     {
-        $header = [
-            'Content-Type'=>'application/json'
-        ];
         $response = $this->post('antrean/getlisttask',$data);
 
         return $response;
@@ -70,6 +67,16 @@ class Antrean extends BpjsService
             'Content-Type'=>'application/json'
         ];
         $response = $this->get('ref/pasien/fp/identitas/'.$param.'/noidentitas/'.$keyword);
+
+        return $response;
+    }
+
+    public function AntreanPerTanggal($date = null)
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->get('antrean/pendaftaran/tanggal/'.$date);
 
         return $response;
     }
